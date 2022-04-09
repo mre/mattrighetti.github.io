@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Automate XCTests with GitHub Actions</title>
+    <meta name="description"
+        content="">
+    <link rel="canonical" href="https://mattrighetti.github.io/2020/10/16/automate-xctests-with-github-actions.html">
+    <link rel="alternate" type="application/rss+xml" title="mattrighetti"
+        href="https://mattrighetti.github.io/feed.xml">
+
+    <link rel="stylesheet" href=" /css/font.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href=" /css/style.css">
+    <link rel="stylesheet" href=" /css/code.css">
+</head>
+
+<body class="mx-auto max-width">
+    <header class="mx-auto site-header">
+        <nav>
+            <a class="-title" href="/">mattrighetti</a>
+            
+            
+            
+            
+            
+            
+            
+            <a href="/about.html">About</a>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <a href="/projects.html">Projects</a>
+            
+            
+            
+            
+            
+            <a href="/resume.html">Resume</a>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        </nav>
+    </header>
+
+    <main>
+        <article>
+  <h1>Automate XCTests with GitHub Actions</h1>
+  <div class="post-meta sect1">Oct 16, 2020</div>
+  <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ever since GitHub introduced GitHub Actions in 2018, developers now have a
+powerful tool to create complex pipelines for CI/CD without the need to rely on
+third-party software.</p>
+</div>
+<div class="paragraph">
+<p>If you’ve worked on a project with a team composed of multiple people, you know
+that a lot of things can go wrong. A lot of code can break with a single commit
+pushed/merged by mistake or a commit made by a user who was not paying much
+attention to other people’s code.</p>
+</div>
+<div class="paragraph">
+<p>The most obvious way to overcome this is to create a solid test suite that will
+increase in time and tell you if something is broken and needs fixing or if your
+code fits well with the previous code.</p>
+</div>
+<div class="paragraph">
+<p>Tests can vary a lot, and as your project grows, your test suite will too. There
+are UI and unit tests, and each one of those will need to be tested on different
+devices with different scenarios. Who wants to wait 15 minutes for your tests to
+finish running? GitHub Actions are here to rescue us and will do the work.</p>
+</div>
+<div class="paragraph">
+<p>From here on out, I’m going to use some tests from my test app that is called
+TestApp.</p>
+</div>
+<div class="paragraph">
+<p>Let’s first create a .yml file that is going to contain our XCTest workflow. I’m
+calling it xctest-workflow.yml and it needs to be put in the .github/workflows
+folder in order for GitHub to recognize and execute it.</p>
+</div>
+<div class="paragraph">
+<p>This is how the workflow is going to look:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="na">name</span><span class="pi">:</span> <span class="s">iOS Test Workflow</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">master</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">master</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">Build and Test default scheme using iPhone/iPad simulator</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">macos-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Force Xcode </span><span class="m">11</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">sudo xcode-select -switch /Applications/Xcode_11.7.app</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">iOS build setup</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPhone</span>
+          <span class="s">11,OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPhone </span><span class="m">11</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPhone</span>
+          <span class="s">11,OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPhone 11 Pro Max</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPhone 11</span>
+          <span class="s">Pro Max,OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPad Air</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPad Air</span>
+          <span class="s">(3rd generation),OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPad Pro </span><span class="m">12.9</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPad Pro</span>
+          <span class="s">(12.9-inch) (4th generation),OS=13.7'</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="workflow-definition">Workflow Definition</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On lines 1-8, we’re giving a name to the workflow itself and instructing that it
+should run every time there is a push to the master branch or a pull request has
+been issued on the master branch. You can add more branches or customise when
+you want it to run. Check out all the possible events in the
+<a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#on">GH
+Actions docs</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="workflow-job">Workflow Job</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On lines 9-41, we’re defining what is actually going to be your workflow. In
+this snippet, I’m keeping stuff simple, but you can define more jobs to run on
+the events specified on lines 1-5. Read more about this in the
+<a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobs">GH Actions docs</a>.</p>
+</div>
+<div class="paragraph">
+<p>As you can see, I’m calling the job <code>build</code> and instructing that it should run
+on a macOS operating system. Immediately after that, I’m defining five different
+steps that will test my code on five different iOS devices.</p>
+</div>
+<div class="paragraph">
+<p>The core command here is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="Shell session">$ xcodebuild test \
+    -workspace TestApp.xcodeproj/project.xcworkspace \
+    -scheme TestApp \
+    -destination 'platform=iOS Simulator, name=iPad Air (3rd generation),OS=13.7'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command is going to test all the code contained in my test suite on an iPad
+Air simulator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="push-and-forget">Push and Forget</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Right now, if you’ve replicated all the steps correctly, you should see
+something in the Actions panel as soon as you push/pull request stuff to your
+master branch:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*rm0DkyON3dOROrRRjlypkg.png" alt="1*rm0DkyON3dOROrRRjlypkg">
+</div>
+</div>
+<div class="paragraph">
+<p>If your run is successful, you should see a checkmark next to all the steps.
+What’s really useful is that, in case your run fails, GitHub Actions will
+instantly notify you by email that your job has failed. So if you’re pushing
+stuff to a remote server just before leaving work and you don’t receive an email
+during the commute, you’ll know that everything went fine.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this article, I’ve just scratched the surface of what you can do with GitHub
+Actions. I’ll definitely cover more advanced stuff in the future, but for the
+moment, I hope you’ve enjoyed your introduction to CI automation.</p>
+</div>
+</div>
+</div>
+</article>
+<script>
+    function renderCodeTags() {
+        const collection = document.getElementsByClassName("rouge highlight");
+
+        for (let i = 0; i < collection.length; i++) {
+        let cNode = collection[i].firstChild;
+        let lang = cNode.getAttribute("data-lang");
+        
+        let newNode = document.createElement("div");
+        newNode.className = "lang-tag";
+        newNode.innerHTML += lang;
+        
+        collection[i].insertBefore(newNode, cNode);
+        }
+    }
+
+    renderCodeTags()
+</script>
+    </main>
+
+    <footer class="site-footer">
+        <p>
+            <a href=" /feed.xml">
+                <i class="fa fa-rss"></i> rss
+            </a>
+
+            <a href="https://github.com/mattrighetti">
+                <i class="fa fa-github"></i> mattrighetti
+            </a>
+        </p>
+    </footer>
+
+</body>
+
+</html>

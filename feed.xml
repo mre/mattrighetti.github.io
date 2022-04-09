@@ -1,0 +1,1820 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://mattrighetti.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://mattrighetti.github.io/" rel="alternate" type="text/html" /><updated>2022-04-09T16:55:32+00:00</updated><id>https://mattrighetti.github.io/feed.xml</id><title type="html">mattrighetti</title><subtitle>Just another programming blog
+</subtitle><author><name>Mattia Righetti</name></author><entry><title type="html">I Need To Find An Appartment</title><link href="https://mattrighetti.github.io/2022/04/05/i-need-to-find-an-appartment.html" rel="alternate" type="text/html" title="I Need To Find An Appartment" /><published>2022-04-05T00:00:00+00:00</published><updated>2022-04-05T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2022/04/05/i-need-to-find-an-appartment</id><content type="html" xml:base="https://mattrighetti.github.io/2022/04/05/i-need-to-find-an-appartment.html"><![CDATA[<div class="paragraph">
+<p>Long story short: I&#8217;ve taken a new position in Luxembourg and I have to
+find an apartment, in a different country, in a reasonably short time.</p>
+</div>
+<div class="openblock note">
+<div class="content">
+<div class="paragraph">
+<p><strong>TL;DR:</strong> I hate apartment hunting, I&#8217;ve tried to make it as interesting
+as possible by creating a pipeline with different tools and languages
+to <em>scrape</em> data from a website with the use of Puppeteer, load data into
+a SQLite database using Go and visualizing all the data with Python and Folium.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If you want to look at the final code or follow along with me
+you can checkout the project repo on
+<a href="https://github.com/mattrighetti/athome-scraper">GitHub</a>.</p>
+</div>
+<div class="paragraph">
+<p>I initially sketched what I was looking for by priority</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 700 571" xmlns="http://www.w3.org/2000/svg" width="500"><g transform="matrix(.1 0 0 -.1 0 571)"><path d="m1092 4878c-5-7-17-40-27-73-22-76-52-135-109-212-28-39-53-63-65-63-27 0-44-26-37-55 6-23 21-30 55-25 17 2 51 42 120 139l53 76-5-275c-3-151-11-291-17-311-14-49 1-92 32-87 14 2 25 13 30 33 12 40 26 825 16 848-10 20-31 22-46 5z"/><path d="m2167 4779c-110-26-183-116-124-153 22-14 51 3 55 33 4 27 39 50 92 62 62 14 120-15 149-73 32-66 28-87-26-140-58-55-85-70-129-70-52 0-65 16-62 76 3 48 2 51-21 51-19 0-27-7-34-30-13-44-25-467-14-482 28-37 89 5 67 46-5 11-10 78-10 149v128h63c80 0 128 25 196 101 45 51 51 63 51 103-1 83-54 162-132 194-41 18-64 18-121 5z"/><path d="m3850 4597c-32-14-67-21-117-21-98-2-113-16-83-77 19-41 21-54 14-169-8-158 4-228 47-264 55-47 140-43 188 8 39 41 1 76-45 41-21-16-81-20-102-6-28 17-43 150-19 168 6 6 31 13 54 17 66 10 114 36 111 61-3 23-42 33-62 16-7-6-34-14-60-17l-46-7v66c0 70 14 97 50 97 32 0 126 39 145 60 15 16 15 22 5 35-16 19-25 18-80-8z"/><path d="m2990 4595c-17-20-29-141-29-292-1-67-6-144-13-172-13-59-1-84 41-79 26 3 26 4 28 103 2 55 7 176 12 270 8 129 7 171-2 177-17 11-23 10-37-7z"/><path d="m3374 4590c-63-25-125-193-126-341-3-218 133-302 256-157 40 46 43 59 20 79-13 11-22 6-61-34-49-51-85-66-107-48-74 62-54 336 31 433 21 23 43 11 43-23 0-35 30-55 60-39 40 22 11 102-45 126-39 16-42 16-71 4z"/><path d="m2502 4529c-73-36-90-60-68-94 15-23 15-37 1-328-4-83-3-89 18-96 12-5 29-5 39 0 14 8 16 24 11 126l-4 118 49 23c59 26 103 28 124 5 27-31 55-96 61-142 6-51 25-75 51-65 45 17-24 226-87 265-18 10-36 20-41 22s1 22 13 45c30 59 25 119-13 144-26 17-95 7-154-23zm128-51c0-33-48-108-76-119-41-15-44-12-44 49 0 51 3 60 23 70 60 29 97 29 97 0z"/><path d="m1264 4052c-40-27-7-100 38-83 32 12 36 54 6 75-25 18-29 19-44 8z"/><path d="m1906 3895c-19-19-21-51-3-62 6-4 44-8 82-9 39-1 196-11 350-23 562-42 724-51 943-51 141 0 222-4 222-10 0-13 46-13 71 0 22 12 25 43 7 58-8 6-150 12-353 15-187 3-396 10-465 16-200 17-242 20-490 37-215 14-264 20-326 39-13 4-27 1-38-10z"/><path d="m1878 3794c-20-6-31-34-23-56 7-17 60-32 76-22 5 3 182-6 392-20 210-13 506-30 657-36s311-15 355-20 117-9 162-9c45-1 85-5 88-11 9-14 58-13 73 2 17 17 15 46-5 56-10 5-90 12-178 16-88 3-207 10-265 16-58 5-233 14-390 20-346 12-802 44-900 63-14 3-33 3-42 1z"/><path d="m976 2959c-41-28-47-35-44-63 3-27 7-31 33-31 23 0 33 7 43 28 33 68 82 31 82-62 0-71-68-277-139-421-84-170-77-180 119-180 117 0 141 3 160 18 13 10 19 23 15 33-5 13-25 15-140 11-98-3-135-1-135 7 0 6 20 51 44 99s64 149 90 225c65 194 63 303-6 351-34 24-70 19-122-15z"/><path d="m5300 2971c-5-11-10-56-10-101 0-92-8-113-50-135-27-14-30-14-49 11-23 29-28 83-11 115 15 26-4 59-33 59-38 0-47-18-41-84 13-138 66-196 148-162 43 18 42 21 51-134 8-152 18-190 50-190 30 0 39 27 26 77-6 21-15 104-21 184-9 129-8 151 6 185 20 46 22 140 5 172-15 28-56 29-71 3z"/><path d="m4920 2934c-19-9-93-32-165-53-142-42-167-60-139-99 19-28 64-30 71-3 6 25 30 34 37 15 10-25 28-245 22-261-10-26 13-54 41-51 35 4 52 32 35 58-6 11-12 41-12 67 0 46-16 172-25 203-3 11 21 23 100 48 103 34 126 51 104 78-14 17-25 17-69-2z"/><path d="m2253 2878c-4-7-7-114-6-237 2-123 0-222-3-219-6 6-143 231-207 341-30 51-45 67-62 67-13 0-26-8-30-17-3-10-3-132 1-271 6-232 8-254 25-263 13-7 26-6 40 2 18 9 20 16 14 47-9 46-22 352-15 352 3 0 51-75 105-166 115-192 143-215 181-143 12 24 14 71 11 271-4 236-5 243-25 246-11 2-24-3-29-10z"/><path d="m4420 2875c-7-9-9-24-5-37s17-88 29-167c16-109 25-147 38-155s21-7 30 2 9 35-3 119c-8 60-14 135-14 168s-4 66-8 73c-11 17-52 15-67-3z"/><path d="m4098 2850c-50-34-109-113-128-174-16-50-8-151 15-196 24-49 63-88 109-112 78-40 202-7 250 68 33 50-12 74-55 28-38-41-77-57-124-51-56 6-89 31-120 91-33 66-33 126 1 194 47 95 151 157 169 102 4-11 18-28 31-37 23-14 26-14 44 2 30 27 24 50-22 84-57 42-108 42-170 1z"/><path d="m2896 2848c-3-7-7-33-11-58-3-25-39-133-80-240-63-169-71-198-60-215 30-48 75-24 73 39-1 58 16 96 44 96 13 0 50 9 82 20 33 11 60 20 61 20s14-27 30-60c31-65 44-75 71-56 16 12 16 17-14 79-18 36-32 72-32 79 0 8-7 24-16 37-9 12-35 78-58 144-35 104-44 122-64 125-12 2-24-3-26-10zm61-219 22-60-34-15c-19-8-42-11-53-6-18 7-18 9 6 75 14 37 28 67 31 67s16-27 28-61z"/><path d="m3285 2827c-51-20-104-57-110-77-3-11-2-27 3-37s15-58 22-108c14-104 30-149 58-164 16-9 24-7 37 5 14 15 14 19-5 50-12 18-20 44-18 56 5 36 69 37 120 2 47-33 118-111 118-130 0-7 8-17 17-23 21-12 53 3 53 25 0 25-86 130-135 165l-45 32 35 39c24 26 35 48 35 69 0 37-24 85-49 99-26 13-98 12-136-3zm115-62c29-35-33-106-107-121-28-5-33-3-37 17-3 13-2 40 2 59 6 28 15 37 42 47 48 16 85 16 100-2z"/><path d="m2610 2756c-20-8-75-20-124-27-95-15-113-28-97-71 5-13 12-48 15-78 10-76 43-178 72-222 22-34 29-38 68-38 32 0 54 8 84 30 46 33 50 41 27 60-13 11-23 9-54-8-55-31-69-28-91 21-11 23-20 47-20 53s26 17 58 23c53 10 102 39 102 60 0 5-7 14-16 22-13 10-20 10-42-3-25-15-63-22-103-19-11 1-19 13-23 35-8 43 1 65 28 71 11 2 46 9 76 15 31 6 70 19 88 30 28 17 31 23 22 40-12 23-21 24-70 6z"/><path d="m1336 2324c-19-18-20-28-6-55 20-37 80-15 80 30 0 14-29 41-45 41-7 0-21-7-29-16z"/><path d="m960 1432c-46-22-86-92-70-122 22-40 89-15 77 30-10 38 58 64 104 40 12-7 19-21 19-41 0-37-72-119-105-119-12 0-34-10-49-21-21-16-26-28-24-53 4-41 32-45 81-11 64 43 118 29 170-45 27-38 22-107-11-156-49-74-80-104-127-124-59-25-85-26-85-1s-26 34-45 15c-20-21-19-57 3-77 24-22 100-22 150-2 46 20 140 119 172 181 25 51 30 118 11 166-13 35-68 96-103 114l-29 15 22 30c23 33 35 94 25 134-14 57-115 83-186 47z"/><path d="m2470 1419c-51-30-61-46-48-75 6-13 17-24 23-24 8 0 14-52 19-177 4-98 7-192 6-209-1-38 21-58 54-50 30 7 36 31 19 73-18 46-18 144 1 137 25-9 154 35 198 69 24 18 51 49 62 70 17 36 17 40 1 83-30 79-111 123-230 124-54 0-78-5-105-21zm198-54c88-37 106-92 47-143-41-37-131-68-169-58l-27 7 3 104 3 105h53c29 0 69-7 90-15z"/><path d="m3380 1409c-82-33-139-164-128-293 5-66 24-95 93-148 89-67 166-73 231-16 38 34 43 53 16 67-14 7-25 4-47-15-16-13-39-27-52-30-32-9-105 30-149 78-37 41-37 41-31 111 7 86 47 174 82 183 30 7 46-2 38-22-6-16 23-54 42-54 15 0 45 33 45 49 0 20-43 72-72 87-31 16-34 16-68 3z"/><path d="m2984 1402c-6-4-30-45-52-92-37-77-58-141-97-295-7-27-16-58-19-67-8-16 24-58 43-58 25 0 42 33 36 71-7 43-17 38 107 62l67 13 18-43c19-45 33-56 58-47 19 8 19 37 1 72-31 61-89 230-102 301-16 82-31 103-60 83zm56-304c-7-9-111-30-118-24-7 8 18 106 41 160l21 49 31-89c17-49 28-92 25-96z"/><path d="m3955 1398c-22-5-77-8-122-5-93 5-106-1-102-55 1-18 1-97 0-175-2-124 1-149 18-188 15-34 29-49 55-60 73-31 152-14 195 41 26 33 26 41 1 54-16 8-25 5-50-20-23-23-40-30-69-30-55 0-82 25-88 83-7 55 7 77 48 77 49 0 128 21 151 40 21 17 22 20 7 35-14 15-22 15-51 6-19-6-59-12-89-14l-54-2-3 49c-6 93-3 96 88 96 82 0 125 12 135 38 5 14-11 43-24 41-3-1-24-5-46-11z"/><path d="m2040 1388c-47-13-70-36-70-68 0-36 7-40 119-80 99-35 142-64 166-111 32-62 9-121-60-153-48-23-148-38-199-31-35 6-42 10-42 28 1 31-42 35-72 7-29-27-28-56 3-76 42-27 233-24 305 4 127 51 170 139 121 247-29 64-91 108-207 145-59 19-61 28-10 35 37 6 51 4 66-10 41-37 95 9 63 54-12 18-24 21-81 20-37 0-83-5-102-11z"/><path d="m1338 864c-11-23-10-29 11-45 21-17 26-18 45-6 41 27 27 77-20 77-17 0-28-9-36-26z"/></g></svg>
+</div>
+</div>
+<div class="paragraph">
+<p>After that it was time for the boring stuff: looking for an apartment
+that best fits my requirements.</p>
+</div>
+<div class="paragraph">
+<p>I have a couple of friends in Lux and they all told me to look on the infamous
+website <a href="https://athome.lu">AtHome.lu</a> to get an idea on the available
+apartments that there are in Lux, so I did.</p>
+</div>
+<div class="paragraph">
+<p>I don&#8217;t like doing this, so I try to make things easier by just
+looking at the pictures and if the price looks ok I&#8217;ll just bookmark
+the thing so that I can look at it later for comparisons.</p>
+</div>
+<div class="paragraph">
+<p>This quickly becomes hard to do. Some agencies will publish part of the
+monthly price, some of them will post the actual monthly price. Each
+agency fee is different and it&#8217;s not immediately visible. The map
+on the website is just awful and it won&#8217;t let me compare positions with other
+apartments. Needless to say that it is pretty much impossible to choose
+the right one with this messy data.</p>
+</div>
+<div class="paragraph">
+<p>What I&#8217;d like to have is a big map with all the apartments that I like on
+it and maybe a database to query apartments to show by different parameters.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see if we can scrape some data off of athome.lu!</p>
+</div>
+<div class="paragraph">
+<p>After giving a quick look at the website I&#8217;ve found out that by selecting
+the renting apartments in the Luxembourg area, links start with this URL path
+<code>www.athome.lu/en/rent/apartment/luxembourg</code>, each apartment
+has a unique id and the complete address for an apartment looks like this
+<code>www.athome.lu/en/rent/apartment/luxembourg/id-642398588.html</code>.</p>
+</div>
+<div class="paragraph">
+<p>This is a good start, it means that I can pretty much navigate to a specific apartment
+page just by knowing its id.</p>
+</div>
+<div class="paragraph">
+<p>If I inspect the html source of a single page, I immediately notice that there
+is a <strong>HUGE</strong> json object with a lot of data in it at the bottom of the page,</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/assets/images/initstate.png" alt="initstate">
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see if we can find something interesting in it.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/assets/images/initstate_console.png" alt="initstate console">
+</div>
+</div>
+<div class="paragraph">
+<p>Cool, it seems like a big object to set up the entire page. If we look at
+each sub-object of <code><em>INITIAL_STATE</em></code> we find <code>detail</code> which
+seems to be our lucky card.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/assets/images/detail_console.png" alt="detail console">
+</div>
+</div>
+<div class="paragraph">
+<p>Great! We don&#8217;t even have to scrape data from html, we have all the data of the
+apartment in this <code><em>INITIAL_STATE</em>.detail</code> object!</p>
+</div>
+<div class="paragraph">
+<p>How can I access that variable through code though? I don&#8217;t have a great experience with it
+and I don&#8217;t write a lot of JS, but I heard that <a href="https://developers.google.com/web/tools/puppeteer/">Puppeteer</a>
+is the right tool for the job. Let me try something out</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="nx">puppeteer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">puppeteer</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">fs</span><span class="dl">'</span><span class="p">).</span><span class="nx">promises</span><span class="p">;</span>
+
+<span class="k">async</span> <span class="kd">function</span> <span class="nx">scrape_json_data</span><span class="p">(</span><span class="nx">browser</span><span class="p">,</span> <span class="nx">link</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">page</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">browser</span><span class="p">.</span><span class="nx">newPage</span><span class="p">();</span>
+    <span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nx">goto</span><span class="p">(</span><span class="nx">link</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">obj</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="p">{</span> <span class="nx">detail</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">__INITIAL_STATE__</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nx">detail</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">browser</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">puppeteer</span><span class="p">.</span><span class="nx">launch</span><span class="p">({</span> <span class="na">headless</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
+    <span class="c1">// File where I'll save all my preferred apartments' links</span>
+    <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">LINKS_PATH</span><span class="p">,</span> <span class="dl">"</span><span class="s2">utf-8</span><span class="dl">"</span><span class="p">);</span>
+    <span class="c1">// Read line by line</span>
+    <span class="kd">const</span> <span class="nx">links</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/</span><span class="se">\r?\n</span><span class="sr">/</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">objs</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="k">in</span> <span class="nx">links</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="nx">id_pattern</span> <span class="o">=</span> <span class="sr">/id-</span><span class="se">(\d</span><span class="sr">+</span><span class="se">)</span><span class="sr">/</span><span class="p">;</span>
+        <span class="c1">// Take id from final part of each link</span>
+        <span class="kd">let</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">links</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">match</span><span class="p">(</span><span class="nx">id_pattern</span><span class="p">)[</span><span class="mi">1</span><span class="p">];</span>
+
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">scraping: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">id</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">obj</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">scrape_json_data</span><span class="p">(</span><span class="nx">browser</span><span class="p">,</span> <span class="nx">links</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">obj</span><span class="p">.</span><span class="nx">found</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Remove all the superfluous data from detail obj</span>
+            <span class="nx">obj</span> <span class="o">=</span> <span class="nx">clean_obj</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+            <span class="c1">// Add link to the obj, somehow it's not included in detail obj :/</span>
+            <span class="nx">obj</span><span class="p">.</span><span class="nx">link</span> <span class="o">=</span> <span class="nx">links</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+            <span class="nx">objs</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">objs</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="na">found</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> <span class="na">listingId</span><span class="p">:</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Save obj data to json file</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">JSON_OUT</span><span class="p">,</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">objs</span><span class="p">));</span>
+    <span class="k">await</span> <span class="nx">browser</span><span class="p">.</span><span class="nx">close</span><span class="p">()</span>
+<span class="p">})();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The code above will open a headless instance of chrome, go to each
+apartment link that is saved in the file at <code>LINKS_PATH</code> and
+spit an array of all the apartment data in a file at <code>JSON_OUT</code>.</p>
+</div>
+<div class="paragraph">
+<p>We were lucky this time, we didn&#8217;t have to go through scraping html,
+and this would have probably been the most boring part of the entire process.
+The next steps will be about storing data in a database and visualizing it,
+but first let&#8217;s write a <a href="https://github.com/casey/just">justfile</a>
+(alternative to a Makefile) that will make our life easier when we
+need to execute commands.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="justfile">base     := justfile_directory()
+json_out := "/tmp/res.json"
+links    := base + "/homes.txt"
+
+scrape:
+    LINKS_PATH={{links}} \
+    JSON_OUT={{json_out}} \
+    node scraper/main.js</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I can now scrape data by just typing</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="Shell session">$ just scrape</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I want to save all the data to a sqlite database
+so that I can conveniently check, query and get
+apartments info whenever I want and however I want.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s move away from js and switch to a compiled language,
+Go will fit perfectly for this, it&#8217;s fast and easy to use.</p>
+</div>
+<div class="paragraph">
+<p>The binary will parse the entire json file that the scraper created
+and load each apartment to the <code>apartment</code> table in sqlite.</p>
+</div>
+<div class="paragraph">
+<p>I didn&#8217;t show it before, but this is my final, cleaned-from-useless-stuff
+<code>Apartment</code> struct with some tag annotations to read from json and load into
+sqlite by using <a href="https://github.com/jmoiron/sqlx">sqlx</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="go"><span class="k">type</span> <span class="n">Apartment</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">Found</span>                  <span class="kt">bool</span>      <span class="s">`json:"found,omitempty" db:"found,omitempty"`</span>
+	<span class="n">ListingId</span>              <span class="kt">uint32</span>    <span class="s">`json:"listingId,omitempty" db:"listingId,omitempty"`</span>
+	<span class="n">ListingAgencyReference</span> <span class="kt">string</span>    <span class="s">`json:"listingAgencyReference,omitempty" db:"listingAgencyReference,omitempty"`</span>
+	<span class="n">IsSoldProperty</span>         <span class="kt">bool</span>      <span class="s">`json:"isSoldProperty,omitempty" db:"isSoldProperty,omitempty"`</span>
+	<span class="n">Region</span>                 <span class="kt">string</span>    <span class="s">`json:"region,omitempty" db:"region,omitempty"`</span>
+	<span class="n">CityName</span>               <span class="kt">string</span>    <span class="s">`json:"cityName,omitempty" db:"cityName,omitempty"`</span>
+	<span class="n">Lon</span>                    <span class="kt">float64</span>   <span class="s">`json:"lon,omitempty" db:"lon,omitempty"`</span>
+	<span class="n">Lat</span>                    <span class="kt">float64</span>   <span class="s">`json:"lat,omitempty" db:"lat,omitempty"`</span>
+	<span class="n">Price</span>                  <span class="kt">int</span>       <span class="s">`json:"price,omitempty" db:"price,omitempty"`</span>
+	<span class="n">ChargesPrice</span>           <span class="kt">int</span>       <span class="s">`json:"chargesPrice,omitempty" db:"chargesPrice,omitempty"`</span>
+	<span class="n">Caution</span>                <span class="kt">float32</span>   <span class="s">`json:"caution,omitempty" db:"caution,omitempty"`</span>
+	<span class="n">AgencyFee</span>              <span class="kt">string</span>    <span class="s">`json:"agency_fee,omitempty" db:"agency_fee,omitempty"`</span>
+	<span class="n">PropertySubType</span>        <span class="kt">string</span>    <span class="s">`json:"propertySubType,omitempty" db:"propertySubType,omitempty"`</span>
+	<span class="n">PublisherId</span>            <span class="kt">int</span>       <span class="s">`json:"publisher_id,omitempty" db:"publisher_id,omitempty"`</span>
+	<span class="n">PublisherRemoteVisit</span>   <span class="kt">bool</span>      <span class="s">`json:"publisher_remote_visit,omitempty" db:"publisher_remote_visit,omitempty"`</span>
+	<span class="n">PublisherPhone</span>         <span class="kt">string</span>    <span class="s">`json:"publisher_phone,omitempty" db:"publisher_phone,omitempty"`</span>
+	<span class="n">PublisherName</span>          <span class="kt">string</span>    <span class="s">`json:"publisher_name,omitempty" db:"publisher_name,omitempty"`</span>
+	<span class="n">PublisherAthomeId</span>      <span class="kt">string</span>    <span class="s">`json:"publisher_athome_id,omitempty" db:"publisher_athome_id,omitempty"`</span>
+	<span class="n">PropertySurface</span>        <span class="kt">float64</span>   <span class="s">`json:"propertySurface,omitempty" db:"propertySurface,omitempty"`</span>
+	<span class="n">BuildingYear</span>           <span class="kt">string</span>    <span class="s">`json:"buildingYear,omitempty" db:"buildingYear,omitempty"`</span>
+	<span class="n">FloorNumber</span>            <span class="kt">string</span>    <span class="s">`json:"floorNumber,omitempty" db:"floorNumber,omitempty"`</span>
+	<span class="n">BathroomsCount</span>         <span class="kt">int</span>       <span class="s">`json:"bathroomsCount,omitempty" db:"bathroomsCount,omitempty"`</span>
+	<span class="n">BedroomsCount</span>          <span class="kt">int</span>       <span class="s">`json:"bedroomsCount,omitempty" db:"bedroomsCount,omitempty"`</span>
+	<span class="n">BalconiesCount</span>         <span class="kt">int</span>       <span class="s">`json:"balconiesCount,omitempty" db:"balconiesCount,omitempty"`</span>
+	<span class="n">CarparkCount</span>           <span class="kt">int</span>       <span class="s">`json:"carparkCount,omitempty" db:"carparkCount,omitempty"`</span>
+	<span class="n">GaragesCount</span>           <span class="kt">int</span>       <span class="s">`json:"garagesCount,omitempty" db:"garagesCount,omitempty"`</span>
+	<span class="n">HasLivingRoom</span>          <span class="kt">bool</span>      <span class="s">`json:"hasLivingRoom,omitempty" db:"hasLivingRoom,omitempty"`</span>
+	<span class="n">HasKitchen</span>             <span class="kt">bool</span>      <span class="s">`json:"hasKitchen,omitempty" db:"hasKitchen,omitempty"`</span>
+	<span class="n">Availability</span>           <span class="kt">string</span>    <span class="s">`json:"availability,omitempty" db:"availability,omitempty"`</span>
+	<span class="n">Media</span>                  <span class="o">*</span><span class="p">[]</span><span class="kt">string</span> <span class="s">`json:"media,omitempty" db:"media,omitempty"`</span>
+	<span class="n">Description</span>            <span class="kt">string</span>    <span class="s">`json:"description,omitempty" db:"description,omitempty"`</span>
+	<span class="n">Link</span>                   <span class="kt">string</span>    <span class="s">`json:"link,omitempty" db:"link,omitempty"`</span>
+	<span class="n">CreatedAt</span>              <span class="kt">string</span>    <span class="s">`json:"createdAt,omitempty" db:"createdAt,omitempty"`</span>
+	<span class="n">UpdatedAt</span>              <span class="kt">string</span>    <span class="s">`json:"updatedAt,omitempty" db:"updatedAt,omitempty"`</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I might change my mind later down the road on the data that I want to keep
+in each <code>Apartment</code> struct, so I might want to make changes to the database structure,
+and therefore the queries to insert and update the database too. To make this a bit more
+flexible I will use a yaml file to save any database migration and insert/update
+queries to the database.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="na">migrations</span><span class="pi">:</span> <span class="pi">|</span>
+  <span class="s">CREATE TABLE IF NOT EXISTS apartment(</span>
+      <span class="s">found BOOL,</span>
+      <span class="s">listingId INTEGER PRIMARY KEY,</span>
+      <span class="s">...</span>
+      <span class="s">description TEXT,</span>
+      <span class="s">link TEXT,</span>
+      <span class="s">createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</span>
+      <span class="s">updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+  <span class="s">);</span>
+
+
+<span class="na">insertQuery</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">INSERT INTO apartment(found,listingId,listingAgencyReference,isSoldProperty,region,cityName,</span>
+                          <span class="s">lon,lat,price,chargesPrice,caution,agency_fee,propertySubType,publisher_id,</span>
+                          <span class="s">publisher_remote_visit,publisher_phone,publisher_name,publisher_athome_id,</span>
+                          <span class="s">propertySurface,buildingYear,floorNumber,bathroomsCount,bedroomsCount,balconiesCount,</span>
+                          <span class="s">garagesCount,carparkCount,hasLivingRoom,hasKitchen,availability,media,description,link)</span>
+    <span class="s">VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</span>
+
+
+<span class="na">updateQuery</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">UPDATE apartment</span>
+    <span class="s">SET found = ?, listingId = ?, listingAgencyReference = ?, isSoldProperty = ?, region = ?, cityName = ?, lon = ?, lat = ?, price = ?,</span>
+        <span class="s">chargesPrice = ?, caution = ?, agency_fee = ?, propertySubType = ?, publisher_id = ?, publisher_remote_visit = ?, publisher_phone = ?,</span>
+        <span class="s">publisher_name = ?, publisher_athome_id = ?, propertySurface = ?, buildingYear = ?, floorNumber = ?, bathroomsCount = ?,</span>
+        <span class="s">bedroomsCount = ?, balconiesCount = ?, garagesCount = ?, carparkCount = ?, hasLivingRoom = ?, hasKitchen = ?,</span>
+        <span class="s">availability = ?, media = ?, description = ?, link = ?, updatedAt = CURRENT_TIMESTAMP</span>
+    <span class="s">WHERE listingId = ?</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After setting up these basic features and with a little more code
+I can compile the program and run it so that it will load the previous
+json file into my sqlite <code>apartment</code> table.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s add some more commands to the justfile that we&#8217;ve
+created previously.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="justfile">db_path  := base + "/db.sqlite"
+
+gobuild:
+    cd {{base}}/loader; go build cmd/main.go
+
+load: gobuild
+    CONFIG_PATH={{base}}/loader/config.yaml \
+    JSON_OUT={{json_out}} \
+    DB_PATH={{db_path}} \
+    {{base}}/loader/main
+
+fetch: scrape load</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s load the data into database</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="Shell session">$ just load
+&gt; OR
+$ just fetch
+&gt; which will first scrape data and then load it in the database
+&gt; justfiles are cool!</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Just to get some specs, this runs fast. Take a look</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="Shell session">$ cat home.txt | wc
+  65      66    4469
+$ time just load
+just load  0.38s user 0.52s system 220% cpu 0.408 total</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I now have all the data that I scraped in my nice and super fast
+database, ready to be queried with the craziest query that comes
+to my mind, I can think of some.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re at a going point at the moment, I have a lot of parameters
+with which I can query apartments that I like. I can select them by
+non-decreasing price, by area and if I add some more complex Haversine
+formulae I could also sort them by distance from the city centre or any
+other map coordinates.</p>
+</div>
+<div class="paragraph">
+<p>I won&#8217;t stop here though. I have some interesting little vars in
+each apartment data: <code>lat</code>, <code>lon</code>. I don&#8217;t want to waste geo data!
+It&#8217;s nice and fun to just look at tabular data, but I think I could
+get an easier idea of the location just by plotting stuff on a map.</p>
+</div>
+<div class="paragraph">
+<p>I want to code something quick with the smallest amount of code, so I&#8217;ll
+go with Python and Jupyter notebook in conjunction with
+<a href="https://python-visualization.github.io/folium/">Folium</a> which is
+a library that generates <a href="https://leafletjs.com/">Leaflet</a> maps.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s setup the map with my point of interest</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="python"><span class="kn">import</span> <span class="nn">folium</span>
+
+<span class="n">lux_coords</span> <span class="o">=</span> <span class="p">[</span><span class="mf">49.611622</span><span class="p">,</span> <span class="mf">6.131935</span><span class="p">]</span>
+<span class="n">map_</span> <span class="o">=</span> <span class="n">folium</span><span class="p">.</span><span class="n">Map</span><span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="n">lux_coords</span><span class="p">,</span> <span class="n">zoom_start</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">interesting_coords</span> <span class="o">=</span> <span class="p">[</span><span class="mf">49.630033</span><span class="p">,</span> <span class="mf">6.168936</span><span class="p">]</span>
+<span class="n">folium</span><span class="p">.</span><span class="n">Marker</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">interesting_coords</span><span class="p">,</span> <span class="n">popup</span><span class="o">=</span><span class="s">"Point of interest"</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">folium</span><span class="p">.</span><span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">'red'</span><span class="p">)).</span><span class="n">add_to</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+
+<span class="n">folium</span><span class="p">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">interesting_coords</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'green'</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">2</span><span class="p">).</span><span class="n">add_to</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+<span class="n">folium</span><span class="p">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">interesting_coords</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'yellow'</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">2</span><span class="p">).</span><span class="n">add_to</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+<span class="n">folium</span><span class="p">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">interesting_coords</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'orange'</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">2</span><span class="p">).</span><span class="n">add_to</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+<span class="n">folium</span><span class="p">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">interesting_coords</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'red'</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">2</span><span class="p">).</span><span class="n">add_to</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will show a map centered on Lux, with a cool red pin on my point of interest
+and to get a better idea of the distance, I also added some circles with a radius of
+5km, 10km, 15km and 20km. This is extremely useful because I can discard immediately
+by looking at the map of apartments that are too far from my point of interest.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/assets/images/poi.png" alt="poi">
+</div>
+</div>
+<div class="paragraph">
+<p>Before going crazy with SQL I need to add my scraped apartments
+to the map and for the sake of simplicity I will query them all here</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+
+
+<span class="k">def</span> <span class="nf">getApartments</span><span class="p">(</span><span class="n">db</span><span class="p">):</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="p">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s">"""
+        SELECT *
+        FROM apartment
+        WHERE
+            found = TRUE
+        """</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">Apartment</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cur</span><span class="p">.</span><span class="n">fetchall</span><span class="p">()]</span>
+
+
+<span class="k">def</span> <span class="nf">addApartment</span><span class="p">(</span><span class="n">map_</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">folium</span><span class="p">.</span><span class="n">Popup</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">_popup_</span><span class="p">(),</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">450</span><span class="p">)</span>
+    <span class="n">folium</span><span class="p">.</span><span class="n">Marker</span><span class="p">(</span>
+        <span class="n">location</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">a</span><span class="p">.</span><span class="n">lon</span><span class="p">],</span>
+        <span class="n">popup</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span>
+        <span class="c1"># I can use fontawesome to change the pin icon
+</span>        <span class="n">icon</span><span class="o">=</span><span class="n">folium</span><span class="p">.</span><span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">a</span><span class="p">.</span><span class="n">_get_color</span><span class="p">(),</span> <span class="n">icon</span><span class="o">=</span><span class="n">a</span><span class="p">.</span><span class="n">_get_icon</span><span class="p">(),</span> <span class="n">prefix</span><span class="o">=</span><span class="s">"fa"</span><span class="p">)</span>
+    <span class="p">).</span><span class="n">add_to</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">environ</span><span class="p">[</span><span class="s">"DB_PATH"</span><span class="p">])</span>
+<span class="n">apartments</span> <span class="o">=</span> <span class="n">getApartments</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">apartments</span><span class="p">:</span>
+    <span class="n">addApartment</span><span class="p">(</span><span class="n">map_</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">map_</span></code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/assets/images/poi_apartments.png" alt="poi apartments">
+</div>
+</div>
+<div class="paragraph">
+<p>And here we have it! Definitely a much better experience
+than going back and forth on the website and drawing on a map
+all the apartments one by one, right?</p>
+</div>
+<div class="paragraph">
+<p>In the code above you can see that I&#8217;ve used a custom popup for each
+apartment. With Folium we can use HTML to customize the pin&#8217;s popup
+with the most important information I want to see (i.e. monthly total price, initial fee,
+caution etc.)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="python"><span class="k">def</span> <span class="nf">_popup_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s">"""
+    &lt;h4&gt;Info&lt;/h4&gt;
+    &lt;b&gt;ID: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">listingId</span><span class="si">}</span><span class="s">&lt;br&gt;
+    &lt;b&gt;Monthly Price: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">price</span><span class="si">}</span><span class="s">&lt;br&gt;
+    &lt;b&gt;Monthly Charge: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">chargesPrice</span><span class="si">}</span><span class="s">&lt;br&gt;
+    &lt;b&gt;Caution: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">caution</span><span class="si">}</span><span class="s">&lt;br&gt;
+    &lt;b&gt;Agency Fee: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">agencyFee</span><span class="si">}</span><span class="s">
+    &lt;br&gt;
+    &lt;h4&gt;Total&lt;/h4&gt;
+    &lt;b&gt;Monthly: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">price</span> <span class="o">+</span> <span class="bp">self</span><span class="p">.</span><span class="n">chargesPrice</span><span class="si">}</span><span class="s">&lt;br&gt;
+    &lt;b&gt;Initial: &lt;/b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">caution</span> <span class="o">+</span> <span class="bp">self</span><span class="p">.</span><span class="n">agencyFee</span><span class="si">}</span><span class="s">&lt;br&gt;&lt;br&gt;
+    &lt;a href="</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">link</span><span class="si">}</span><span class="s">" target="_blank"&gt;Page&lt;/a&gt;&lt;br&gt;
+    &lt;a href="</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">galleryLink</span><span class="si">}</span><span class="s">" target="_blank"&gt;Gallery&lt;/a&gt;&lt;br&gt;
+    """</span></code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/assets/images/popup.png" alt="popup">
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s just what I wanted, I can now see on the map which are the best
+located apartments in Lux and immediately get to see the info that I&#8217;m
+interested in the most!</p>
+</div>
+<div class="paragraph">
+<p>Why would I save the data on a database if I don&#8217;t use SQL at all?
+Let&#8217;s say that I have a base budget of 1000€ and I want to show only
+the apartments on which I would have to spend an incremental amount of 200€,
+I could simply change the SQL query to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="k">SELECT</span> <span class="o">*</span>
+<span class="k">FROM</span> <span class="n">apartment</span>
+<span class="k">WHERE</span>
+    <span class="k">found</span> <span class="o">=</span> <span class="k">TRUE</span> <span class="k">AND</span>
+    <span class="n">listingId</span> <span class="k">IN</span> <span class="p">(</span>
+        <span class="k">SELECT</span> <span class="n">listingId</span>
+        <span class="k">FROM</span> <span class="n">apartment</span>
+        <span class="k">WHERE</span>
+            <span class="k">found</span> <span class="o">=</span> <span class="k">TRUE</span> <span class="k">AND</span>
+            <span class="n">price</span> <span class="o">+</span> <span class="n">chargesPrice</span> <span class="o">&lt;</span> <span class="mi">1000</span> <span class="o">+</span> <span class="mi">200</span>
+    <span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Phewww, if you&#8217;re still here reading all this you deserve a bonus point.</p>
+</div>
+<div class="paragraph">
+<p>Imagine I saw a very cool apartment that looks like a very good deal but
+it&#8217;s a bit out of the city, what&#8217;s the best way to know how much it is going
+to take me to get from that apartment to my point of interest with public transportation?</p>
+</div>
+<div class="paragraph">
+<p>If you paid close attention to the image above you might already know the answer,
+Google Maps of course! Google Maps is very cool, you can get directions from
+position x to position y by visiting <code>www.google.com/maps/dir/x.lat,x.lon/y.lat,y.lon</code>.</p>
+</div>
+<div class="paragraph">
+<p>All I need to do is add <code>&lt;a href="{self.mapsDir}" target="_blank"&gt;Maps Directions&lt;/a&gt;</code>
+to the popup dialog I pasted above and I will have a very handy link that
+will open Google Maps on a new tab with the time travel from position x to y.</p>
+</div>
+<div class="paragraph">
+<p>This will save me so much time, you have no idea!</p>
+</div>
+<div class="paragraph">
+<p>Why don&#8217;t we finish this by completing our justfile? In the end I
+want to type a single command and be shown the map with all the apartments
+that I saved on my file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="justfile">open:
+    DB_PATH={{db_path}} \
+    jupyter notebook \
+    {{base}}/analyzer/apartments.ipynb
+
+show: fetch open</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is so convenient, I can finally only look at pictures of cool
+apartments, save the link on my file and at the end of the day type</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="Shell session">$ just show</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Life is good now, at least I made the process funnier and more efficient
+than before!</p>
+</div>
+<div class="paragraph">
+<p>The only thing that is <em>very slow</em> at the moment is the first js snippet,
+it takes ~1s to get a single apartment, multiply
+that for 100 apartments and you will have to wait for a couple of minutes before
+seeing all the pins on the map. The immediate solution would be to make multiple
+page requests at a time but I&#8217;m not much of an expert with `Promise`s so I think
+I&#8217;ll stick with this solution until I&#8217;m not bored again to wait
+for the tool to scrape each link.</p>
+</div>
+<div class="paragraph">
+<p>I now need to get back to hunting that apartment, wish me luck!</p>
+</div>]]></content><author><name>Mattia Righetti</name></author><summary type="html"><![CDATA[Long story short: I&#8217;ve taken a new position in Luxembourg and I have to find an apartment, in a different country, in a reasonably short time.]]></summary></entry><entry><title type="html">SQLite on iOS: The MVVM Way</title><link href="https://mattrighetti.github.io/2022/03/02/use-sqlite-in-ios.html" rel="alternate" type="text/html" title="SQLite on iOS: The MVVM Way" /><published>2022-03-02T00:00:00+00:00</published><updated>2022-03-02T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2022/03/02/use-sqlite-in-ios</id><content type="html" xml:base="https://mattrighetti.github.io/2022/03/02/use-sqlite-in-ios.html"><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="image"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fdownload.logo.wine%2Flogo%2FSQLite%2FSQLite-Logo.wine.png&amp;f=1&amp;nofb=1" alt="?u=https%3A%2F%2Fdownload.logo.wine%2Flogo%2FSQLite%2FSQLite Logo.wine"></span></p>
+</div>
+<div class="paragraph">
+<p>Last week I was studying
+<a href="https://github.com/Ranchero-Software/NetNewsWire">NetNewsWire</a>
+to see if I could find something interesting
+to implement in my projects.</p>
+</div>
+<div class="paragraph">
+<p>A cool thing that I’ve found is that the project does not use CoreData,
+instead it makes use of SQLite. The project’s author explained on the
+Sundell podcast episode #95 some good points on why adopting SQLite has
+improved performance greatly.</p>
+</div>
+<div class="paragraph">
+<p>Sometimes you may want something more from your data storage, you want
+more control, or you just want to work with tables and SQL lite statements.</p>
+</div>
+<div class="paragraph">
+<p>I wanted to try this because I don&#8217;t have a good relationship with CoreData
+and CloudKit integration, I HATE GUIs and also because I work a lot on backend
+services so I prefer to work with the data layer and optimize indexing and queryies
+myself and having them written down.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="introducing-fmdb">Introducing FMDB</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/ccgus/fmdb">FMDB</a> is an Objective-C wrapper around SQLite,
+it&#8217;s open source and it&#8217;s really easy to setup and it happens to be the only
+good library that lets you do that (I may be wrong here, if you know other
+good libraries please let me know, I would love to try them out!)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="setup">Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s create a new Xcode project, I&#8217;ll call mine SQLiteIntro.</p>
+</div>
+<div class="paragraph">
+<p>This app is not going to be really complex as I just want to give a
+little introduction to the topic, just the right amount to give you an idea
+on how working with SQL looks like in a swift project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="datawrapper">DataWrapper</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s good practice to separate logic in its dedicated class/struct. In this case,
+since we&#8217;re working with an SQL database I want to create a class that will abstract
+a bit of data layer logic so that code will be a lot cleaner going forward.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">final</span> <span class="kd">class</span> <span class="kt">DataWrapper</span><span class="p">:</span> <span class="kt">ObservableObject</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">db</span><span class="p">:</span> <span class="kt">FMDatabase</span>
+
+    <span class="nf">init</span><span class="p">(</span><span class="nv">fileName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"test"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 1 - Get filePath of the SQLite file</span>
+        <span class="k">let</span> <span class="nv">fileURL</span> <span class="o">=</span> <span class="k">try!</span> <span class="kt">FileManager</span><span class="o">.</span><span class="k">default</span>
+            <span class="o">.</span><span class="nf">url</span><span class="p">(</span><span class="nv">for</span><span class="p">:</span> <span class="o">.</span><span class="n">applicationSupportDirectory</span><span class="p">,</span> <span class="nv">in</span><span class="p">:</span> <span class="o">.</span><span class="n">userDomainMask</span><span class="p">,</span> <span class="nv">appropriateFor</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">create</span><span class="p">:</span> <span class="kc">true</span><span class="p">)</span>
+            <span class="o">.</span><span class="nf">appendingPathComponent</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">fileName</span><span class="se">)</span><span class="s">.sqlite"</span><span class="p">)</span>
+
+        <span class="c1">// 2 - Create FMDatabase from filePath</span>
+        <span class="k">let</span> <span class="nv">db</span> <span class="o">=</span> <span class="kt">FMDatabase</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="n">fileURL</span><span class="p">)</span>
+
+        <span class="c1">// 3 - Open connection to database</span>
+        <span class="k">guard</span> <span class="n">db</span><span class="o">.</span><span class="nf">open</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">fatalError</span><span class="p">(</span><span class="s">"Unable to open database"</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 4 - Initial table creation</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="n">db</span><span class="o">.</span><span class="nf">executeUpdate</span><span class="p">(</span><span class="s">"create table if not exists users(username varchar(255) primary key, age integer)"</span><span class="p">,</span> <span class="nv">values</span><span class="p">:</span> <span class="kc">nil</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+            <span class="nf">fatalError</span><span class="p">(</span><span class="s">"cannot execute query"</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">db</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is all you need to start, simple right?</p>
+</div>
+<div class="paragraph">
+<p>The code is straightforward: when the DataWrapper class
+is initially created it will look for the database file, if the file is not
+present FMDB will create a database for you with that path.
+Finally it opens a connection to the database and creates the <code>user</code> table.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="model">Model</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To work with the database records I want to create a <code>User</code> struct,
+in my example I&#8217;m going to include some other JSON related stuff because
+I&#8217;m going to use it later to create users with random name using some web APIs.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">struct</span> <span class="kt">User</span><span class="p">:</span> <span class="kt">Hashable</span><span class="p">,</span> <span class="kt">Decodable</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">username</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">age</span><span class="p">:</span> <span class="kt">Int</span>
+
+    <span class="nf">init</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">age</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span>
+    <span class="p">}</span>
+
+    <span class="nf">init</span><span class="p">?(</span><span class="n">from</span> <span class="nv">result</span><span class="p">:</span> <span class="kt">FMResultSet</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nv">username</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="nf">string</span><span class="p">(</span><span class="nv">forColumn</span><span class="p">:</span> <span class="s">"username"</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">age</span> <span class="o">=</span> <span class="kt">Int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="nf">int</span><span class="p">(</span><span class="nv">forColumn</span><span class="p">:</span> <span class="s">"age"</span><span class="p">))</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">nil</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kd">enum</span> <span class="kt">CodingKeys</span> <span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">username</span> <span class="o">=</span> <span class="s">"first_name"</span>
+    <span class="p">}</span>
+
+    <span class="nf">init</span><span class="p">(</span><span class="n">from</span> <span class="nv">decoder</span><span class="p">:</span> <span class="kt">Decoder</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">container</span> <span class="o">=</span> <span class="k">try</span> <span class="n">decoder</span><span class="o">.</span><span class="nf">container</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">CodingKeys</span><span class="o">.</span><span class="k">self</span><span class="p">)</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="k">try</span> <span class="n">container</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="kt">Int</span><span class="o">.</span><span class="nf">random</span><span class="p">(</span><span class="nv">in</span><span class="p">:</span> <span class="mi">1</span><span class="o">..&lt;</span><span class="mi">100</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>FMResultSet</code> is what you will always get when you execute a query from the database,
+even if you expect a single record, or an empty result, that&#8217;s why it&#8217;s useful to have
+a dedicated init function to handle all the setup logic in this case.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="combine-and-mvvm">Combine and MVVM</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Since I&#8217;m using SwiftUI I&#8217;d like the <code>DataWrapper</code> to be reactive and notify
+the view of possible changes in the database.
+Going back to the implementation of <code>DataWrapper</code>,
+I&#8217;m adding a <code>@Published</code> array of users so that I can display
+them in a <code>List</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">final</span> <span class="kd">class</span> <span class="kt">DataWrapper</span><span class="p">:</span> <span class="kt">ObservableObject</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">db</span><span class="p">:</span> <span class="kt">FMDatabase</span>
+
+    <span class="kd">@Published</span> <span class="k">var</span> <span class="nv">users</span> <span class="o">=</span> <span class="p">[</span><span class="kt">User</span><span class="p">]()</span>
+
+    <span class="o">...</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To fetch users from the database and publish them as soon as the database is opend
+we need to create a method to query all users and set them to DataWrapper&#8217;s users
+variable after the database initialization.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">func</span> <span class="nf">getAllUsers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">User</span><span class="p">]</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">users</span> <span class="o">=</span> <span class="p">[</span><span class="kt">User</span><span class="p">]()</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">result</span> <span class="o">=</span> <span class="k">try</span> <span class="n">db</span><span class="o">.</span><span class="nf">executeQuery</span><span class="p">(</span><span class="s">"select username, age from users"</span><span class="p">,</span> <span class="nv">values</span><span class="p">:</span> <span class="kc">nil</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">result</span><span class="o">.</span><span class="nf">next</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="k">let</span> <span class="nv">user</span> <span class="o">=</span> <span class="kt">User</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">users</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">users</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">users</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and place this call at the bottom of the <code>init</code> method of <code>DataWrapper</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="n">users</span> <span class="o">=</span> <span class="nf">getAllUsers</span><span class="p">()</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now when you first fire <code>DataWrapper</code> it will automatically
+fetch all the users and they will be ready to be used in SwiftUI.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;ll create an <code>insert</code> function that I&#8217;m going to use later</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">func</span> <span class="nf">insert</span><span class="p">(</span><span class="n">_</span> <span class="nv">user</span><span class="p">:</span> <span class="kt">User</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="n">db</span><span class="o">.</span><span class="nf">executeUpdate</span><span class="p">(</span>
+            <span class="s">"""
+            insert into users (username, age)
+            values (?, ?)
+            """</span><span class="p">,</span>
+            <span class="nv">values</span><span class="p">:</span> <span class="p">[</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">age</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">users</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="nf">fatalError</span><span class="p">(</span><span class="s">"cannot insert user: </span><span class="se">\(</span><span class="n">error</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="a-quick-swiftui-view">A Quick SwiftUI View</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I want to create a <code>List</code> that displays all the users that the database contains
+and also create a simple function that queries a web API to get a random username
+and inserts a new user into the database.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">struct</span> <span class="kt">ContentView</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@EnvironmentObject</span> <span class="k">var</span> <span class="nv">db</span><span class="p">:</span> <span class="kt">DataWrapper</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="kt">NavigationView</span> <span class="p">{</span>
+            <span class="kt">List</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">users</span><span class="p">,</span> <span class="nv">id</span><span class="p">:</span> <span class="p">\</span><span class="o">.</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span> <span class="n">user</span> <span class="k">in</span>
+                <span class="kt">HStack</span> <span class="p">{</span>
+                    <span class="kt">Text</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+                    <span class="kt">Spacer</span><span class="p">()</span>
+                    <span class="kt">Text</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">user</span><span class="o">.</span><span class="n">age</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="o">.</span><span class="nf">navigationTitle</span><span class="p">(</span><span class="s">"Users"</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">toolbar</span> <span class="p">{</span>
+                <span class="kt">ToolbarItem</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="s">"plus"</span><span class="p">,</span> <span class="nv">placement</span><span class="p">:</span> <span class="o">.</span><span class="n">navigationBarTrailing</span><span class="p">,</span> <span class="nv">showsByDefault</span><span class="p">:</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kt">Button</span><span class="p">(</span><span class="nv">action</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nf">createRandomUser</span><span class="p">()</span>
+                    <span class="p">},</span> <span class="nv">label</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="kt">Image</span><span class="p">(</span><span class="nv">systemName</span><span class="p">:</span> <span class="s">"plus"</span><span class="p">)</span>
+                    <span class="p">})</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kd">func</span> <span class="nf">createRandomUser</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">url</span> <span class="o">=</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"https://random-data-api.com/api/name/random_name"</span><span class="p">)</span><span class="o">!</span>
+        <span class="k">let</span> <span class="nv">task</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="nf">dataTask</span><span class="p">(</span><span class="nv">with</span><span class="p">:</span> <span class="n">url</span><span class="p">)</span> <span class="p">{</span> <span class="n">data</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">error</span> <span class="k">in</span>
+            <span class="k">guard</span> <span class="k">let</span> <span class="nv">data</span> <span class="o">=</span> <span class="n">data</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nf">fatalError</span><span class="p">(</span><span class="s">"No data"</span><span class="p">)</span>
+            <span class="p">}</span>
+
+            <span class="kt">DispatchQueue</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="k">async</span> <span class="p">{</span>
+                <span class="k">let</span> <span class="nv">user</span> <span class="o">=</span> <span class="k">try!</span> <span class="kt">JSONDecoder</span><span class="p">()</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">User</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="n">data</span><span class="p">)</span>
+                <span class="n">db</span><span class="o">.</span><span class="nf">insert</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">task</span><span class="o">.</span><span class="nf">resume</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you run your app now, you will be presented with an empty
+list, but if you press the plus button you will start to
+insert stuff in the database and names will begin to appear
+reactively in your list.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="https://media.giphy.com/media/bBV1Sbs5soDaEuqQh0/giphy.gif" alt="giphy"></span></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This was a very simple scenario that might now show a huge
+boot in performance with respect to the CoreData version, but
+it&#8217;s a different way to store data in a more familiar SQLite database.</p>
+</div>
+<div class="paragraph">
+<p>If you want more control over your data, SQLite and the power of SQL
+will certainly not let you down. SQLite could improve
+performance in applications that need fine grained control
+and aimed query optimizations. It&#8217;s also easier to sync data
+with CloudKit since now you just have to sync the sqlite file
+without dealing with all the CoreData tables and different versions.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;m working on an article that talks about migration strategies with SQLite,
+so if you want to know more stay tuned!</p>
+</div>
+</div>
+</div>]]></content><author><name>Mattia Righetti</name></author></entry><entry><title type="html">Data Caching with NSCache</title><link href="https://mattrighetti.github.io/2021/06/16/data-caching-nscache.html" rel="alternate" type="text/html" title="Data Caching with NSCache" /><published>2021-06-16T00:00:00+00:00</published><updated>2021-06-16T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2021/06/16/data-caching-nscache</id><content type="html" xml:base="https://mattrighetti.github.io/2021/06/16/data-caching-nscache.html"><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*zVw56-JToWySViotHWqtMA.png" alt="1*zVw56 JToWySViotHWqtMA">
+</div>
+</div>
+<div class="paragraph">
+<p>I recently open-sourced my
+<a href="https://github.com/mattrighetti/HNReaderApp">HackerNews reader for macOS</a> that
+is entirely written in SwiftUI for macOS. Analysing my scenario can help to
+explain data caching and data waste avoidance. If you want to get a more
+detailed idea of the code, you can follow along in the project’s GitHub
+repository.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="scenario">Scenario</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Hacker News is a well-known website that stores news reported by users on the
+platform. Each individual story is going to be represented by an Item struct, as
+the HN API’s documentation specifies. We want to fetch available items for the
+user to read in the most data-efficient way.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="initial-implementation-with-no-cache-usage">Initial Implementation With No Cache Usage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The application has an ItemCell view that takes an ItemId from the parent view,
+and as soon as it appears on screen, it will automatically fetch the item and
+display it for me. This approach makes the data usage very low and removes a lot
+of pressure on the backend because only displayed items will actually be
+fetched.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*-0KWAWmDnu2p_MdFVzfDuA.png" alt="1* 0KWAWmDnu2p MdFVzfDuA">
+</div>
+</div>
+<div class="paragraph">
+<p>The application’s sidebar lets the user navigate between the five different
+categories of stories. As you can imagine, some news can potentially belong to
+multiple categories, so when the user switches back and forth between
+categories, they are basically asking for the same items that have previously
+been fetched.</p>
+</div>
+<div class="paragraph">
+<p>This kind of approach without some background logic can drastically increase
+your data usage, decrease the overall app performance, and also put a lot of
+pressure on the HackerNews backend that will unnecessarily give us the same
+information multiple times.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="caching-data">Caching Data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>What we could actually do to solve the problem is cache downloaded items by
+their IDs. This way, items will be fetched just once and the application won’t
+waste data with useless repeated requests to the backend.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*dGewxEQNZvEdXv1q986s6A.png" alt="1*dGewxEQNZvEdXv1q986s6A">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="implementation">Implementation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We know that each item is uniquely identified by an <code>ItemId</code>, which is an
+integer variable. Therefore, we could use that datum to store and retrieve the
+item from the cache.</p>
+</div>
+<div class="paragraph">
+<p>At the time of writing, the
+<a href="https://developer.apple.com/documentation/foundation/nscache"><code>NSCache</code></a>
+implementation only accepts class types, so we need to create a simple class
+wrapper for the Item struct if we want to store it in the cache object. In this
+scenario, we don’t need to wrap our key (<code>ItemId</code>) because there is a shorter
+way to do that: casting it to a <code>String</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">class</span> <span class="kt">StructWrapper</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">:</span> <span class="kt">NSObject</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">value</span><span class="p">:</span> <span class="kt">T</span>
+
+    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">_struct</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">_struct</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Storing and retrieving objects is pretty straightforward now. We need a cache
+object with two functions: one to cache the object and the other to get objects
+back if they are found. I did also implement the common singleton design pattern
+to make sure that I am always using the same cache object.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">class</span> <span class="kt">ItemCache</span><span class="p">:</span> <span class="kt">NSCache</span><span class="o">&lt;</span><span class="kt">NSString</span><span class="p">,</span> <span class="kt">StructWrapper</span><span class="o">&lt;</span><span class="kt">Item</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+    <span class="kd">static</span> <span class="k">let</span> <span class="nv">shared</span> <span class="o">=</span> <span class="kt">ItemCache</span><span class="p">()</span>
+
+    <span class="kd">func</span> <span class="nf">cache</span><span class="p">(</span><span class="n">_</span> <span class="nv">item</span><span class="p">:</span> <span class="kt">Item</span><span class="p">,</span> <span class="k">for</span> <span class="nv">key</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">keyString</span> <span class="o">=</span> <span class="kt">NSString</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%d"</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">itemWrapper</span> <span class="o">=</span> <span class="kt">StructWrapper</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="nf">setObject</span><span class="p">(</span><span class="n">itemWrapper</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="n">keyString</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">getItem</span><span class="p">(</span><span class="k">for</span> <span class="nv">key</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Item</span><span class="p">?</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">keyString</span> <span class="o">=</span> <span class="kt">NSString</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%d"</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">itemWrapper</span> <span class="o">=</span> <span class="k">self</span><span class="o">.</span><span class="nf">object</span><span class="p">(</span><span class="nv">forKey</span><span class="p">:</span> <span class="n">keyString</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">itemWrapper</span><span class="p">?</span><span class="o">.</span><span class="n">value</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we have everything that we need to cache elements and check if one exists in
+memory before fetching it. The fetching function will check for a cache hit/miss
+before actually fetching the data. The fetching will only happen if we get a
+cache miss for the requested object, and when the item is correctly fetched, we
+only have to save it in the cache. The next time we try to fetch that item, it
+will be immediately taken from the cache without any additional fetch.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">private</span> <span class="kd">func</span> <span class="nf">fetchItem</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">cacheKey</span> <span class="o">=</span> <span class="n">itemId</span>
+    <span class="k">if</span> <span class="k">let</span> <span class="nv">cachedItem</span> <span class="o">=</span> <span class="kt">ItemCache</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="nf">getItem</span><span class="p">(</span><span class="nv">for</span><span class="p">:</span> <span class="n">cacheKey</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">cachedItem</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">itemDownloader</span><span class="o">.</span><span class="nf">downloadItem</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="p">{</span> <span class="n">item</span> <span class="k">in</span>
+            <span class="k">guard</span> <span class="k">let</span> <span class="nv">item</span> <span class="o">=</span> <span class="n">item</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+            <span class="kt">ItemCache</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="nf">cache</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nv">for</span><span class="p">:</span> <span class="n">cacheKey</span><span class="p">)</span>
+            <span class="kt">DispatchQueue</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="k">async</span> <span class="p">{</span>
+                <span class="k">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Optimisation is something that you must always be looking for — both for your
+users and other third-party services that you might use in your application.
+With a very simple object, we have actually made some pretty big improvements.
+Now a fetched item will be cached and ready to be retrieved with a cost of
+<strong><em>O(1)</em></strong> the next time you need it.</p>
+</div>
+</div>
+</div>]]></content><author><name>Mattia Righetti</name></author></entry><entry><title type="html">SwiftUI and CoreData: The MVVM Way</title><link href="https://mattrighetti.github.io/2021/02/03/swiftui-and-coredata-mvvm.html" rel="alternate" type="text/html" title="SwiftUI and CoreData: The MVVM Way" /><published>2021-02-03T00:00:00+00:00</published><updated>2021-02-03T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2021/02/03/swiftui-and-coredata-mvvm</id><content type="html" xml:base="https://mattrighetti.github.io/2021/02/03/swiftui-and-coredata-mvvm.html"><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>When I first started using SwiftUI for some small projects, I immediately
+appreciated its ease of use and expressiveness. However, it was not all rosy.</p>
+</div>
+<div class="paragraph">
+<p>As soon as I began to work on some bigger apps — especially the ones that
+required Core Data — it became clear to me that I would have to give a different
+structure to the project itself. Otherwise, I would soon get entangled in a very
+serious maintainability and testing problem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the-bad-easy-way">The Bad, Easy Way</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By going through Apple’s documentation and many other
+answers on Stack Overflow, what you will find is a lot of people placing the
+FetchRequest property wrapper variable inside a View struct that needs to fetch
+some data from the Core Data model.</p>
+</div>
+<div class="paragraph">
+<p>This might be tempting if you’re just starting out, but as you dig a little
+further into the logic involved with the fetched entities, you will soon realise
+that not only is it very hard — if not impossible — to test those
+functions/variables, but you are also no longer following the MVVM pattern. At
+that point, the View struct knows a lot about the entities and the
+functions/properties that you defined inside them. Let me show you an example
+that is easily replicable with other entities:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">struct</span> <span class="kt">SimpleList</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@FetchRequest</span><span class="p">(</span>
+        <span class="nv">entity</span><span class="p">:</span> <span class="kt">Course</span><span class="o">.</span><span class="nf">entity</span><span class="p">(),</span>
+        <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">)</span> <span class="k">var</span> <span class="nv">courses</span><span class="p">:</span> <span class="kt">FetchedResults</span><span class="o">&lt;</span><span class="kt">Course</span><span class="o">&gt;</span>
+
+    <span class="k">var</span> <span class="nv">overallGpa</span><span class="p">:</span> <span class="kt">Double</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">numCourses</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">count</span>
+        <span class="k">let</span> <span class="nv">gradeSum</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="nv">$0</span><span class="o">.</span><span class="n">score</span> <span class="p">}</span><span class="o">.</span><span class="nf">reduce</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">+</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gradeSum</span> <span class="o">/</span> <span class="n">numCourses</span>
+    <span class="p">}</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, I’m fetching all my Course entities that are stored in Core Data
+and introducing some logic that I will show later in my view. How are we going
+to test that computed variable? You might make an ad hoc function that you can
+test later, but that is not a clean way to do it. Plus, you don’t want data
+logic in any view.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="a-clean-alternative">A Clean Alternative</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I tend to have a single <code>ViewModel</code> per <code>View</code> so that I
+can test each component individually and use just what I need in each one of
+them instead of having a big giant <code>ViewModel</code> to pass around in views.</p>
+</div>
+<div class="paragraph">
+<p>With SwiftUI 2.0, you will find out that the initial project passes a
+<code>managedObjectContext</code> as an <code>environmentObject</code> property. We do not want that.
+It is not clean to take that context every time in each View that needs to fetch
+data from the database, and I don’t want my views to know about that either.</p>
+</div>
+<div class="paragraph">
+<p>What I came up with is a more MVVM way of doing this that involves our
+easy-to-use publishers and subscribers.</p>
+</div>
+<div class="paragraph">
+<p>Basically, you are going to create a singleton instance that watches over a
+single entity in the database (in this case, the <code>Course</code> entity) and sends all
+the courses to each subscriber that subscribes to it. This way, you can easily
+instantiate multiple <strong>ViewModels</strong> that subscribe to the storage publisher and
+operate some logic on those entities in a more dedicated and testable space.
+Let’s see an example of what <code>CourseStorage</code> would look like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">class</span> <span class="kt">CourseStorage</span><span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">ObservableObject</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">courses</span> <span class="o">=</span> <span class="kt">CurrentValueSubject</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">Course</span><span class="p">],</span> <span class="kt">Never</span><span class="o">&gt;</span><span class="p">([])</span>
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">courseFetchController</span><span class="p">:</span> <span class="kt">NSFetchedResultsController</span><span class="o">&lt;</span><span class="kt">Course</span><span class="o">&gt;</span>
+
+    <span class="kd">private</span> <span class="k">override</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">courseFetchController</span> <span class="o">=</span> <span class="kt">NSFetchedResultsController</span><span class="p">(</span>
+            <span class="nv">fetchRequest</span><span class="p">:</span> <span class="kt">Course</span><span class="o">.</span><span class="kt">Request</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">rawValue</span><span class="p">,</span>
+                <span class="nv">managedObjectContext</span><span class="p">:</span> <span class="kt">PersistenceController</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">viewContext</span><span class="p">,</span>
+                <span class="nv">sectionNameKeyPath</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">cacheName</span><span class="p">:</span> <span class="kc">nil</span>
+        <span class="p">)</span>
+
+        <span class="k">super</span><span class="o">.</span><span class="nf">init</span><span class="p">()</span>
+
+        <span class="n">courseFetchController</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="k">self</span>
+
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="n">courseFetchController</span><span class="o">.</span><span class="nf">performFetch</span><span class="p">()</span>
+            <span class="n">courses</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">courseFetchController</span><span class="o">.</span><span class="n">fetchedObjects</span> <span class="p">??</span> <span class="p">[]</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+            <span class="kt">NSLog</span><span class="p">(</span><span class="s">"Error: could not fetch objects"</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">add</span><span class="p">()</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">update</span><span class="p">()</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="kt">UUID</span><span class="p">)</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">extension</span> <span class="kt">CourseStorage</span><span class="p">:</span> <span class="kt">NSFetchedResultsControllerDelegate</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">controllerDidChangeContent</span><span class="p">(</span><span class="n">_</span> <span class="nv">controller</span><span class="p">:</span> <span class="kt">NSFetchedResultsController</span><span class="o">&lt;</span><span class="kt">NSFetchRequestResult</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">guard</span> <span class="k">let</span> <span class="nv">courses</span> <span class="o">=</span> <span class="n">controller</span><span class="o">.</span><span class="n">fetchedObjects</span> <span class="k">as?</span> <span class="p">[</span><span class="kt">Course</span><span class="p">]</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+        <span class="n">logger</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="s">"Context has changed, reloading courses"</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">courses</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">courses</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see in the code, I am creating a singleton <code>ObservableObject</code> that
+exposes a course publisher. It is going to emit a new value when the
+<code>managedObjectContext</code> entities change. You might have also noticed that I
+placed the <code>PersistenceController</code> in the class itself. This way, we can forget
+about passing it around to views, as I’ve explained before. In this class, I am
+also handling everything that concerns the Core Data operations, such as saving,
+adding, and deleting entities from the store. As such, I am separating database
+logic from the app’s business logic.</p>
+</div>
+<div class="paragraph">
+<p>Here is an example of how the <code>ViewModel</code> can be structured with these changes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">class</span> <span class="kt">CourseViewViewModel</span><span class="p">:</span> <span class="kt">ObservableObject</span> <span class="p">{</span>
+    <span class="kd">@Published</span> <span class="k">var</span> <span class="nv">activeCourses</span><span class="p">:</span> <span class="p">[</span><span class="kt">Course</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="kd">@Published</span> <span class="k">var</span> <span class="nv">overallGpa</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="kd">@Published</span> <span class="k">var</span> <span class="nv">courses</span><span class="p">:</span> <span class="p">[</span><span class="kt">Course</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="p">{</span>
+        <span class="k">willSet</span> <span class="p">{</span>
+            <span class="n">activeCourses</span> <span class="o">=</span> <span class="n">newValue</span><span class="o">.</span><span class="n">filter</span> <span class="p">{</span> <span class="nv">$0</span><span class="o">.</span><span class="n">mark</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">}</span>
+            <span class="k">let</span> <span class="nv">scoreSum</span> <span class="o">=</span> <span class="n">newValue</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="nv">$0</span><span class="o">.</span><span class="n">score</span> <span class="p">}</span><span class="o">.</span><span class="n">filter</span> <span class="p">{</span> <span class="nv">$0</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">}</span>
+            <span class="k">let</span> <span class="nv">passedCourses</span> <span class="o">=</span> <span class="n">newValue</span><span class="o">.</span><span class="n">filter</span> <span class="p">{</span> <span class="nv">$0</span><span class="o">.</span><span class="n">mark</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">}</span>
+            <span class="n">overallGpa</span> <span class="o">=</span> <span class="n">scoreSum</span> <span class="o">/</span> <span class="n">passedCourses</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="k">var</span> <span class="nv">cancellable</span><span class="p">:</span> <span class="kt">AnyCancellable</span><span class="p">?</span>
+
+    <span class="nf">init</span><span class="p">(</span><span class="nv">coursePublisher</span><span class="p">:</span> <span class="kt">AnyPublisher</span><span class="o">&lt;</span><span class="p">[</span><span class="kt">Course</span><span class="p">],</span> <span class="kt">Never</span><span class="o">&gt;</span> <span class="o">=</span> <span class="kt">CourseStorage</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="n">courses</span><span class="o">.</span><span class="nf">eraseToAnyPublisher</span><span class="p">())</span> <span class="p">{</span>
+        <span class="n">cancellable</span> <span class="o">=</span> <span class="n">coursePublisher</span><span class="o">.</span><span class="n">sink</span> <span class="p">{</span> <span class="p">[</span><span class="k">unowned</span> <span class="k">self</span><span class="p">]</span> <span class="n">courses</span> <span class="k">in</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">courses</span> <span class="o">=</span> <span class="n">courses</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>ViewModel</code> now encapsulates all the data and logic that it is supposed to
+handle. The code is pretty much self-explanatory: The <code>CourseViewModel</code>
+subscribes to the CourseStorage publisher and receives up-to-date course values
+from it.</p>
+</div>
+<div class="paragraph">
+<p>You might be wondering why I am initialising the <code>ViewModel</code> with an
+<code>AnyPublisher</code> value. Remember the testing advantage? It is precisely for this
+situation. If I now want to test <code>CourseViewModel</code> and its logic, I can just
+create a sample test array that contains a bunch of courses, pass that as an
+array publisher to the <code>ViewModel</code>, and make all the asserts necessary for the
+test.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">class</span> <span class="kt">TestVM</span><span class="p">:</span> <span class="kt">XCTest</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">simpleTest</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">courses</span> <span class="o">=</span> <span class="p">[[</span><span class="kt">Course</span><span class="p">(),</span> <span class="kt">Course</span><span class="p">(),</span> <span class="o">...</span><span class="p">]]</span><span class="o">.</span><span class="n">publisher</span>
+        <span class="k">let</span> <span class="nv">vm</span> <span class="o">=</span> <span class="kt">CourseViewModel</span><span class="p">(</span><span class="nv">coursePublisher</span><span class="p">:</span> <span class="n">courses</span><span class="p">)</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="final-result">Final Result</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now, I am going to show you how simple and clean the View struct
+looks with these changes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">struct</span> <span class="kt">SimpleList</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@StateObject</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">viewModel</span> <span class="o">=</span> <span class="kt">CourseViewModel</span><span class="p">()</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No more <code>managedObjectContext</code> passed around views. There is logic separation.
+It is MVVM-compliant, easily testable, and <em>clean</em>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I have to say that I am pretty satisfied with the results. My
+components are now all structured this way and I have not found a single issue
+with the implementation. This is why I encourage you to try this out so that you
+can organise big projects (and smaller ones) in a well-structured, maintainable,
+and more elegant way.</p>
+</div>
+</div>
+</div>]]></content><author><name>Mattia Righetti</name></author></entry><entry><title type="html">Let’s Hack HTTP</title><link href="https://mattrighetti.github.io/2020/12/16/lets-hack-http.html" rel="alternate" type="text/html" title="Let’s Hack HTTP" /><published>2020-12-16T00:00:00+00:00</published><updated>2020-12-16T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2020/12/16/lets-hack-http</id><content type="html" xml:base="https://mattrighetti.github.io/2020/12/16/lets-hack-http.html"><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this article I’m going to show you why you absolutely want to ditch
+<a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a> websites by
+impersonating an attacker that has targeted you.</p>
+</div>
+<div class="openblock warn">
+<div class="content">
+<div class="paragraph">
+<p><strong>This article is for educational purposes only. Do not try this with people
+that didn’t explicitly give you permission to do so.</strong></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="what-you-will-learn">What you will learn</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This article should give you a better understanding of
+why HTTP is bad and why you should avoid it. Also you’ll learn a few different
+tools that are common in the IT world.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tools">Tools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We’re going to use some well known pen-testing tools to make this
+happen:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>nmap</strong></p>
+</li>
+<li>
+<p><strong>ettercap</strong></p>
+</li>
+<li>
+<p><strong>WireShark</strong></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="initial-phase">Initial Phase</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Our attack is useless if we don’t have anyone to hack, so what
+an attacker would do first is actually FIND you in the network. That’s what
+<strong>nmap</strong> is famous for. What <strong>nmap</strong> will do is scan the entire network and
+look for connected hosts which we can potentially attack.</p>
+</div>
+<div class="paragraph">
+<p>I’m going to scan my home network with <strong>nmap</strong> but before that I need my local
+IP address</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*624dbYbYnjAKpdcnSjDtrA.png" alt="1*624dbYbYnjAKpdcnSjDtrA">
+</div>
+</div>
+<div class="paragraph">
+<p>Great, now I know that my local IP is <strong>192.168.1.151</strong> and the subnet mask is
+<strong>255.255.255.0</strong>, that’s all I need to performa a network exploration with
+<strong>nmap</strong></p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*0jUZSMofWAsMZbNHuZrZYQ.png" alt="1*0jUZSMofWAsMZbNHuZrZYQ">
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see I provided nmap with the IPs to scan in the network, which in
+this case are all the addresses that go from <strong>192.168.1.1</strong> to
+<strong>192.168.1.254</strong>, the flag -sn will make nmap try to determine whether the
+specified hosts are up and what are their names.</p>
+</div>
+<div class="paragraph">
+<p>My target is going to be my iMac that’s sitting next to me, its IP address is
+<strong>192.168.1.195</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="packet-sniffing">Packet Sniffing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that we have our target we need to sniff his/her HTTP
+packets. Since we’re all connected to a router at the moment, we’re going to see
+nothing useful in WireShark because my iMac’s packets are not sent directly to
+me, the router will just send those packets to my iMac.</p>
+</div>
+<div class="paragraph">
+<p>How are we going to make those packets come to us then if the router will just
+send them to my iMac? This can be performed with a well known attack called
+<a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">MITM</a> (Man In The Middle)
+that will make all those packets pass through us before reaching his intended
+destination.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*YGsEp-aWVhkUe2JAIq-3Lw.png" alt="1*YGsEp aWVhkUe2JAIq 3Lw">
+</div>
+</div>
+<div class="paragraph">
+<p>You might be wondering what <strong>ettercap</strong> is doing here, let me explain.</p>
+</div>
+<div class="paragraph">
+<p>Every router relies heavily on <a href="https://en.wikipedia.org/wiki/Address_Resolution_Protocol">ARP</a>,
+(Address Resolution Protocol), to know where devices are on the
+network. It basically links every MAC address (which never changes) to its
+device IP address. What <strong>ettercap</strong> here is basically doing is called
+<a href="https://en.wikipedia.org/wiki/ARP_spoofing">ARP poisoning</a>,
+which I’m using to make the router think that I am the victim’s
+computer so that it will send all the packets intended for my iMac to me, and
+I’m also telling the iMac that I am the router so it should send all the packets
+to me. Starting to see the bigger picture? 🙃</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*-gwmGLi8rn__ZlYKWAIgUw.png" alt="1* gwmGLi8rn  ZlYKWAIgUw">
+</div>
+</div>
+<div class="paragraph">
+<p>These are all the packets that are going through my iMac to the router and from
+the router to the iMac. Luckily this will mostly be encrypted stuff, but guess
+what, HTTP is not. Let’s move to WireShark so we can capture and filter all the
+packets that we need. While ettercap is still going, I’m going to capture
+packets with WireShark and at the same moment I’m going to use my iMac to
+navigate to an <a href="http://www.bio.acousti.ca/">unsecured website</a> which is just a
+dummy site that uses HTTP.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*PlyWovxZ3PnvQrUQXSdlrQ.png" alt="1*PlyWovxZ3PnvQrUQXSdlrQ">
+</div>
+</div>
+<div class="paragraph">
+<p>I also did filter packets by IP and HTTP protocol to have a better understanding
+of what I captured. Now WireShark will help me put those pieces together, if I
+right click on one of those HTTP packets and select <strong>Follow &gt; HTTP stream</strong>
+I’ll get everything of what the victim browsed in cleartext.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*zVyWd7VriRIN9YUcUFWMIQ.png" alt="1*zVyWd7VriRIN9YUcUFWMIQ">
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*RjUQgaCyOi1EFg32vZ5p0A.png" alt="1*RjUQgaCyOi1EFg32vZ5p0A">
+</div>
+</div>
+<div class="paragraph">
+<p>From here I can see everything the victim did on that site, I could grab his
+login credentials when he/she tries to log in and every other possible bad thing
+that pops to my mind.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now you know that when you are browsing on an insecure website,
+even worse on a public network, keep in mind that you are not safe and bad guys
+could be watching every step that you make.</p>
+</div>
+</div>
+</div>]]></content><author><name>Mattia Righetti</name></author></entry><entry><title type="html">Automate XCTests with GitHub Actions</title><link href="https://mattrighetti.github.io/2020/10/16/automate-xctests-with-github-actions.html" rel="alternate" type="text/html" title="Automate XCTests with GitHub Actions" /><published>2020-10-16T00:00:00+00:00</published><updated>2020-10-16T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2020/10/16/automate-xctests-with-github-actions</id><content type="html" xml:base="https://mattrighetti.github.io/2020/10/16/automate-xctests-with-github-actions.html"><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ever since GitHub introduced GitHub Actions in 2018, developers now have a
+powerful tool to create complex pipelines for CI/CD without the need to rely on
+third-party software.</p>
+</div>
+<div class="paragraph">
+<p>If you’ve worked on a project with a team composed of multiple people, you know
+that a lot of things can go wrong. A lot of code can break with a single commit
+pushed/merged by mistake or a commit made by a user who was not paying much
+attention to other people’s code.</p>
+</div>
+<div class="paragraph">
+<p>The most obvious way to overcome this is to create a solid test suite that will
+increase in time and tell you if something is broken and needs fixing or if your
+code fits well with the previous code.</p>
+</div>
+<div class="paragraph">
+<p>Tests can vary a lot, and as your project grows, your test suite will too. There
+are UI and unit tests, and each one of those will need to be tested on different
+devices with different scenarios. Who wants to wait 15 minutes for your tests to
+finish running? GitHub Actions are here to rescue us and will do the work.</p>
+</div>
+<div class="paragraph">
+<p>From here on out, I’m going to use some tests from my test app that is called
+TestApp.</p>
+</div>
+<div class="paragraph">
+<p>Let’s first create a .yml file that is going to contain our XCTest workflow. I’m
+calling it xctest-workflow.yml and it needs to be put in the .github/workflows
+folder in order for GitHub to recognize and execute it.</p>
+</div>
+<div class="paragraph">
+<p>This is how the workflow is going to look:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="na">name</span><span class="pi">:</span> <span class="s">iOS Test Workflow</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">master</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">master</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">Build and Test default scheme using iPhone/iPad simulator</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">macos-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Force Xcode </span><span class="m">11</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">sudo xcode-select -switch /Applications/Xcode_11.7.app</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">iOS build setup</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPhone</span>
+          <span class="s">11,OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPhone </span><span class="m">11</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPhone</span>
+          <span class="s">11,OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPhone 11 Pro Max</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPhone 11</span>
+          <span class="s">Pro Max,OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPad Air</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPad Air</span>
+          <span class="s">(3rd generation),OS=13.7'</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">testing ... iPad Pro </span><span class="m">12.9</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+          <span class="s">xcodebuild test -workspace TestApp.xcodeproj/project.xcworkspace</span>
+          <span class="s">-scheme TestApp -destination 'platform=iOS Simulator,name=iPad Pro</span>
+          <span class="s">(12.9-inch) (4th generation),OS=13.7'</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="workflow-definition">Workflow Definition</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On lines 1-8, we’re giving a name to the workflow itself and instructing that it
+should run every time there is a push to the master branch or a pull request has
+been issued on the master branch. You can add more branches or customise when
+you want it to run. Check out all the possible events in the
+<a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#on">GH
+Actions docs</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="workflow-job">Workflow Job</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On lines 9-41, we’re defining what is actually going to be your workflow. In
+this snippet, I’m keeping stuff simple, but you can define more jobs to run on
+the events specified on lines 1-5. Read more about this in the
+<a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobs">GH Actions docs</a>.</p>
+</div>
+<div class="paragraph">
+<p>As you can see, I’m calling the job <code>build</code> and instructing that it should run
+on a macOS operating system. Immediately after that, I’m defining five different
+steps that will test my code on five different iOS devices.</p>
+</div>
+<div class="paragraph">
+<p>The core command here is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="Shell session">$ xcodebuild test \
+    -workspace TestApp.xcodeproj/project.xcworkspace \
+    -scheme TestApp \
+    -destination 'platform=iOS Simulator, name=iPad Air (3rd generation),OS=13.7'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command is going to test all the code contained in my test suite on an iPad
+Air simulator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="push-and-forget">Push and Forget</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Right now, if you’ve replicated all the steps correctly, you should see
+something in the Actions panel as soon as you push/pull request stuff to your
+master branch:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*rm0DkyON3dOROrRRjlypkg.png" alt="1*rm0DkyON3dOROrRRjlypkg">
+</div>
+</div>
+<div class="paragraph">
+<p>If your run is successful, you should see a checkmark next to all the steps.
+What’s really useful is that, in case your run fails, GitHub Actions will
+instantly notify you by email that your job has failed. So if you’re pushing
+stuff to a remote server just before leaving work and you don’t receive an email
+during the commute, you’ll know that everything went fine.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this article, I’ve just scratched the surface of what you can do with GitHub
+Actions. I’ll definitely cover more advanced stuff in the future, but for the
+moment, I hope you’ve enjoyed your introduction to CI automation.</p>
+</div>
+</div>
+</div>]]></content><author><name>Mattia Righetti</name></author></entry><entry><title type="html">Flat List Design in SwiftUI</title><link href="https://mattrighetti.github.io/2020/04/16/flat-list-design-swiftui.html" rel="alternate" type="text/html" title="Flat List Design in SwiftUI" /><published>2020-04-16T00:00:00+00:00</published><updated>2020-04-16T00:00:00+00:00</updated><id>https://mattrighetti.github.io/2020/04/16/flat-list-design-swiftui</id><content type="html" xml:base="https://mattrighetti.github.io/2020/04/16/flat-list-design-swiftui.html"><![CDATA[<div class="sect1">
+<h2 id="introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’m going to explain the little steps that are needed to achieve a good looking flat design in an iOS application that displays a list. Here’s the example I’m going to build.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*v1YvTDvRHNK36evNP_WwNg.png" alt="1*v1YvTDvRHNK36evNP WwNg" width="300">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="changing-your-lists-background-and-hiding-its-separators">Changing Your List’s Background and Hiding Its Separators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The first thing we need to do is change the list’s background and hide its separators.</p>
+</div>
+<div class="paragraph">
+<p>Since List makes use of the old <code>UITableView</code> from <code>UIKit</code>, we just need to change a few parameters when the SwiftUI <code>View</code> is going to be initialised.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">extension</span> <span class="kt">UIColor</span> <span class="p">{</span>
+    <span class="kd">static</span> <span class="k">let</span> <span class="nv">flatDarkBackground</span> <span class="o">=</span> <span class="kt">UIColor</span><span class="p">(</span><span class="nv">red</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="mi">36</span><span class="p">)</span>
+    <span class="kd">static</span> <span class="k">let</span> <span class="nv">flatDarkCardBackground</span> <span class="o">=</span> <span class="kt">UIColor</span><span class="p">(</span><span class="nv">red</span><span class="p">:</span> <span class="mi">46</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="mi">46</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="mi">46</span><span class="p">)</span>
+
+    <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">red</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">a</span><span class="p">:</span> <span class="kt">CGFloat</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">red</span><span class="p">:</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">red</span><span class="p">)</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">green</span><span class="p">)</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="kt">CGFloat</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="nv">alpha</span><span class="p">:</span> <span class="n">a</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">extension</span> <span class="kt">Color</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">decimalRed</span> <span class="nv">red</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="kt">Double</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">red</span><span class="p">:</span> <span class="n">red</span> <span class="o">/</span> <span class="mi">255</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="n">green</span> <span class="o">/</span> <span class="mi">255</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="n">blue</span> <span class="o">/</span> <span class="mi">255</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">flatDarkBackground</span><span class="p">:</span> <span class="kt">Color</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kt">Color</span><span class="p">(</span><span class="nv">decimalRed</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="mi">36</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">flatDarkCardBackground</span><span class="p">:</span> <span class="kt">Color</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kt">Color</span><span class="p">(</span><span class="nv">decimalRed</span><span class="p">:</span> <span class="mi">46</span><span class="p">,</span> <span class="nv">green</span><span class="p">:</span> <span class="mi">46</span><span class="p">,</span> <span class="nv">blue</span><span class="p">:</span> <span class="mi">46</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When that’s done, we’re going to see a list with our predefined background color. The separators are now gone, but the row itself will display in black or white, depending on the <code>colorScheme</code> of the application. To make it the same color as the background, we just need to add this property to the row <code>.listRowBackground(Color.flatDarkBackground)</code>, and voilà.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="row-card-decomposition">Row-Card Decomposition</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’ve created this small infographic to give you a better idea of how the card itself can be created in SwiftUI.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*WRuNfOUh8cK3CzNxQyf--Q.jpeg" alt="1*WRuNfOUh8cK3CzNxQyf  Q">
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see we can divide the row card into four different components:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ZStack</code> to encapsulate the kilometers indication</p>
+</li>
+<li>
+<p><code>VStack</code> to encapsulate the row card info</p>
+</li>
+<li>
+<p><code>HStack</code> to lay out the two components above</p>
+</li>
+<li>
+<p><code>HStack</code> to lay out the caption pills in the row card’s info body</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the-code">The code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let’s go through the implementation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">struct</span> <span class="kt">StoreRow</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+
+    <span class="k">var</span> <span class="nv">title</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">address</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">city</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">categories</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span>
+    <span class="k">var</span> <span class="nv">kilometres</span><span class="p">:</span> <span class="kt">Double</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="kt">ZStack</span><span class="p">(</span><span class="nv">alignment</span><span class="p">:</span> <span class="o">.</span><span class="n">leading</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="kt">Color</span><span class="o">.</span><span class="n">flatDarkCardBackground</span>
+            <span class="kt">HStack</span> <span class="p">{</span>
+                <span class="kt">ZStack</span> <span class="p">{</span>
+                    <span class="kt">Circle</span><span class="p">()</span>
+                        <span class="o">.</span><span class="nf">fill</span><span class="p">(</span>
+                            <span class="kt">LinearGradient</span><span class="p">(</span>
+                                <span class="nv">gradient</span><span class="p">:</span> <span class="kt">Gradient</span><span class="p">(</span><span class="nv">colors</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="n">lightRed</span><span class="p">,</span> <span class="o">.</span><span class="n">darkRed</span><span class="p">]),</span>
+                                <span class="nv">startPoint</span><span class="p">:</span> <span class="o">.</span><span class="n">topLeading</span><span class="p">,</span>
+                                <span class="nv">endPoint</span><span class="p">:</span> <span class="o">.</span><span class="n">bottomTrailing</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+
+                    <span class="kt">VStack</span> <span class="p">{</span>
+                        <span class="kt">Text</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">kilometres</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+                            <span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="nf">system</span><span class="p">(</span><span class="nv">size</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="nv">weight</span><span class="p">:</span> <span class="o">.</span><span class="n">bold</span><span class="p">))</span>
+                            <span class="o">.</span><span class="nf">foregroundColor</span><span class="p">(</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+
+                        <span class="kt">Text</span><span class="p">(</span><span class="s">"km"</span><span class="p">)</span>
+                            <span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="n">caption</span><span class="p">)</span>
+                            <span class="o">.</span><span class="nf">foregroundColor</span><span class="p">(</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="o">.</span><span class="nf">frame</span><span class="p">(</span><span class="nv">width</span><span class="p">:</span> <span class="mi">70</span><span class="p">,</span> <span class="nv">height</span><span class="p">:</span> <span class="mi">70</span><span class="p">,</span> <span class="nv">alignment</span><span class="p">:</span> <span class="o">.</span><span class="n">center</span><span class="p">)</span>
+
+                <span class="kt">VStack</span><span class="p">(</span><span class="nv">alignment</span><span class="p">:</span> <span class="o">.</span><span class="n">leading</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kt">Text</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+                        <span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="n">headline</span><span class="p">)</span>
+                        <span class="o">.</span><span class="nf">fontWeight</span><span class="p">(</span><span class="o">.</span><span class="n">bold</span><span class="p">)</span>
+                        <span class="o">.</span><span class="nf">lineLimit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+                    <span class="kt">Text</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+                        <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+                    <span class="kt">HStack</span><span class="p">(</span><span class="nv">alignment</span><span class="p">:</span> <span class="o">.</span><span class="n">center</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kt">Image</span><span class="p">(</span><span class="nv">systemName</span><span class="p">:</span> <span class="s">"mappin"</span><span class="p">)</span>
+                        <span class="kt">Text</span><span class="p">(</span><span class="n">city</span><span class="p">)</span>
+                    <span class="p">}</span>
+                    <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+                    <span class="kt">HStack</span> <span class="p">{</span>
+                        <span class="kt">ForEach</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="nv">id</span><span class="p">:</span> <span class="p">\</span><span class="o">.</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span> <span class="n">category</span> <span class="k">in</span>
+                            <span class="kt">CategoryPill</span><span class="p">(</span><span class="nv">categoryName</span><span class="p">:</span> <span class="n">category</span><span class="p">)</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+
+                <span class="p">}</span>
+                <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">horizontal</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="o">.</span><span class="nf">clipShape</span><span class="p">(</span><span class="kt">RoundedRectangle</span><span class="p">(</span><span class="nv">cornerRadius</span><span class="p">:</span> <span class="mi">15</span><span class="p">))</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first thing we’re going to declare is the info we’re going to display on the card itself — this way we can later pass these variables dynamically from its parent view.
+To give the row card a lighter background, we declare an outer <code>ZStack</code> that will contain the <code>Color.flatDarkCardBacground</code> and the <code>HStack</code> that contains every row-card component.</p>
+</div>
+<div class="paragraph">
+<p>Next, we implement a <code>ZStack</code> that’ll generate the red circle with the kilometers indication. This will contain a circle shape filled with a linear gradient to give it a nice touch. On top of that, there’s going to be some simple text with the kilometer info.</p>
+</div>
+<div class="paragraph">
+<p>Moving onto the row-card body, we embed the info in a VStack. The first two components are simple texts with different font sizes. The third element is an <code>HStack</code> used to display the icon image next to the text. The last element is a simple <code>HStack</code> that’ll render the green pills with a dynamic ForEach element given an array of strings.</p>
+</div>
+<div class="paragraph">
+<p><strong>Note</strong>: It’s always a good practice to separate these components as much as possible to make them easily reusable and flexible.</p>
+</div>
+<div class="paragraph">
+<p>The <code>CategoryPill</code> view looks as simple as this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="swift"><span class="kd">struct</span> <span class="kt">CategoryPill</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+
+    <span class="k">var</span> <span class="nv">categoryName</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">fontSize</span><span class="p">:</span> <span class="kt">CGFloat</span> <span class="o">=</span> <span class="mf">12.0</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="kt">ZStack</span> <span class="p">{</span>
+            <span class="kt">Text</span><span class="p">(</span><span class="n">categoryName</span><span class="p">)</span>
+                <span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="nf">system</span><span class="p">(</span><span class="nv">size</span><span class="p">:</span> <span class="n">fontSize</span><span class="p">,</span> <span class="nv">weight</span><span class="p">:</span> <span class="o">.</span><span class="n">regular</span><span class="p">))</span>
+                <span class="o">.</span><span class="nf">lineLimit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">.</span><span class="nf">foregroundColor</span><span class="p">(</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+                <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+                <span class="o">.</span><span class="nf">background</span><span class="p">(</span><span class="kt">Color</span><span class="o">.</span><span class="n">green</span><span class="p">)</span>
+                <span class="o">.</span><span class="nf">cornerRadius</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you could have imagined, we’re dealing with a simple text element with a background color and a corner radius.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="final-result">Final result</h2>
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="https://miro.medium.com/max/1400/1*sb3R3bvEAp_9-6AAne5COw.png" alt="1*sb3R3bvEAp 9 6AAne5COw" width="300">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I hope you enjoyed this tutorial and learned how simple it can be to design great UIs with the help of a declarative language like SwiftUI. We’re all looking forward to seeing how much better it can get with version 2.0, which is coming at WWDC20.</p>
+</div>
+<div class="paragraph">
+<p>See you in the next article, and thank you for stopping by!</p>
+</div>
+</div>
+</div>]]></content><author><name>Mattia Righetti</name></author></entry></feed>
